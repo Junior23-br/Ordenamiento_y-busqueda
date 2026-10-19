@@ -1,0 +1,6 @@
+java/out/
+*.class
+__pycache__/
+*.pyc
+.idea/
+results/prueba_harness_*.csv
