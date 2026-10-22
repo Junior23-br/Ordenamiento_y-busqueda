@@ -191,11 +191,12 @@ Todas las mediciones definitivas se realizaron en el mismo equipo, para que los 
 
 | | |
 |---|---|
-| Procesador | _(completar)_ |
-| Memoria RAM | _(completar)_ |
-| Sistema operativo | _(completar)_ |
-| Java | _(completar)_ |
-| Python | _(completar)_ |
+| Equipo | Portátil de César Tulcán (persona 2) |
+| Procesador | Intel Core i7-13620H (13.ª generación) |
+| Memoria RAM | 16 GB |
+| Sistema operativo | Windows 11 Home |
+| Java | OpenJDK 25.0.4.1 LTS (Microsoft Build of OpenJDK) |
+| Python | 3.14.7 (CPython) |
 
 Condiciones: equipo conectado a la corriente, sin otras aplicaciones abiertas y sin uso durante las mediciones.
 

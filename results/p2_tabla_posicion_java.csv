@@ -1,0 +1,7 @@
+algoritmo,inicio_ns,centro_ns,final_ns,final_sobre_inicio
+Lineal,8.0,58763.8,117635.8,14667.8
+Binaria,21.5,19.7,24.5,1.1
+Ternaria,22.4,22.3,23.8,1.1
+Saltos,3.1,249.5,908.0,294.8
+Interpolación,3.4,8.7,3.4,1.0
+Exponencial,2.1,28.6,33.0,15.7
