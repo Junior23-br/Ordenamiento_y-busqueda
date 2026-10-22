@@ -84,9 +84,23 @@ def medir_ordenamiento(nombre, funcion, variante, n, archivo_csv="ordenamiento_p
         # No se oculta el error: queda registrado en el CSV para documentarlo
         guardar_fila(archivo_csv, nombre, 1, variante, n, [], tipo="error:RecursionError")
         print(f"  {nombre:<22} {variante:<7} n={n:>9,}  ERROR: RecursionError (límite de recursión)")
-        return
+        return None
     prom, desv = guardar_fila(archivo_csv, nombre, 1, variante, n, tiempos)
     print(f"  {nombre:<22} {variante:<7} n={n:>9,}  prom={prom/1e6:12.3f} ms  desv={desv/1e6:10.3f} ms")
+    return prom                                  # promedio en ns (None si hubo error)
+
+
+def guardar_estimado(archivo_csv, algoritmo, punto, variante, n, valor_ns):
+    """Registra un valor ESTIMADO (no medido): sin repeticiones y con tipo = estimado."""
+    os.makedirs(RESULTS, exist_ok=True)
+    ruta = os.path.join(RESULTS, archivo_csv)
+    nuevo = not os.path.exists(ruta)
+    with open(ruta, "a", newline="") as f:
+        w = csv.writer(f)
+        if nuevo:
+            w.writerow(COLUMNAS)
+        w.writerow([algoritmo, LENGUAJE, punto, variante, n, "", "", "", "", "",
+                    round(valor_ns, 2), "", "estimado"])
 
 
 # ---------------------------------------------------------------- búsqueda

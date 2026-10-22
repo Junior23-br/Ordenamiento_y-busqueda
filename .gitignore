@@ -1,6 +1,10 @@
-java/out/
-*.class
-__pycache__/
-*.pyc
-.idea/
-results/prueba_harness_*.csv
+Set-Content -Path .gitignore -Encoding ascii -Value @(
+  "java/out/",
+  "*.class",
+  "__pycache__/",
+  "*.pyc",
+  ".idea/",
+  "*.iml",
+  "results/prueba_harness_*.csv",
+  "results/piloto_*.csv"
+)

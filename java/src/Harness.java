@@ -78,8 +78,9 @@ public class Harness {
     }
 
     // ------------------------------------------------------------ ordenamiento
-    public static void medirOrdenamiento(String nombre, Ordenamiento alg, String variante, int n,
-                                         String csv) throws IOException {
+    /** Retorna el promedio en ns, o NaN si hubo desbordamiento de pila. */
+    public static double medirOrdenamiento(String nombre, Ordenamiento alg, String variante, int n,
+                                           String csv) throws IOException {
         int[] original = leer(variante + "_" + n + ".txt");
         int[] esperado = leer("asc_" + n + ".txt");
         try {
@@ -110,12 +111,26 @@ public class Harness {
             double[] pd = guardarFila(csv, nombre, 1, variante, n, t, "medido");
             System.out.printf(Locale.US, "  %-22s %-7s n=%,9d  prom=%12.3f ms  desv=%10.3f ms%n",
                               nombre, variante, n, pd[0] / 1e6, pd[1] / 1e6);
+            return pd[0];
         } catch (StackOverflowError e) {
             // No se oculta el error: queda registrado en el CSV para documentarlo
             guardarFila(csv, nombre, 1, variante, n, new double[0], "error:StackOverflowError");
             System.out.printf(Locale.US, "  %-22s %-7s n=%,9d  ERROR: StackOverflowError (desbordamiento de pila)%n",
                               nombre, variante, n);
+            return Double.NaN;
         }
+    }
+
+    /** Registra un valor ESTIMADO (no medido): sin repeticiones y con tipo = estimado. */
+    public static void guardarEstimado(String csv, String algoritmo, int punto, String variante,
+                                       int n, double valorNs) throws IOException {
+        Files.createDirectories(RESULTS);
+        Path ruta = RESULTS.resolve(csv);
+        boolean nuevo = !Files.exists(ruta);
+        String fila = (nuevo ? ENCABEZADO + "\n" : "")
+            + String.format(Locale.US, "%s,%s,%d,%s,%d,,,,,,%.2f,,estimado%n",
+                            algoritmo, LENGUAJE, punto, variante, n, valorNs);
+        Files.writeString(ruta, fila, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
     static void verificarOrden(String nombre, int[] resultado, int[] esperado, String variante, int n) {
