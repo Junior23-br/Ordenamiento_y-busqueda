@@ -116,9 +116,48 @@ algoritmo,lenguaje,punto,variante,n,rep1,rep2,rep3,rep4,rep5,promedio_ns,desviac
 
 ## 3. Punto 1: Algoritmos de ordenamiento
 
-_(Sección por completar por las personas 2 y 3: algoritmos, fuentes, cómo ejecutar las mediciones, cubetas usadas en Bucket Sort y cómo se estimaron los casos que no terminaron.)_
+Seis algoritmos, con el mismo código en Java y en Python. Todos ordenan el arreglo recibido en el mismo arreglo.
 
-Resultados: `results/ordenamiento_java*.csv` y `results/ordenamiento_python*.csv`.
+| Algoritmo | Complejidad (caso promedio) | Código |
+|---|---|---|
+| Insertion Sort | O(n²) | `python/ordenamientos_p2.py`, `java/src/OrdenamientosP2.java` |
+| Dual-Pivot QuickSort | O(n log n); O(n²) con entrada ordenada | `python/ordenamientos_p2.py`, `java/src/OrdenamientosP2.java` |
+| Heap Sort | O(n log n) | `python/ordenamientos_p2.py`, `java/src/OrdenamientosP2.java` |
+| Merge Sort | O(n log n) | `python/ordenamientos_p3.py`, `java/src/OrdenamientosP3.java` |
+| Radix Sort | O(n) para enteros de 8 dígitos | `python/ordenamientos_p3.py`, `java/src/OrdenamientosP3.java` |
+| Bucket Sort | O(n) con datos uniformes; O(n²) en el peor caso | `python/ordenamientos_p3.py`, `java/src/OrdenamientosP3.java` |
+
+**Variantes de entrada:** cada algoritmo se mide con entrada aleatoria (`random`), ascendente (`asc`) y descendente (`desc`), con n = 1.000, 10.000, 100.000 y 1.000.000.
+
+**Ejecutar las mediciones** (desde la raíz del repositorio). Con `--piloto` solo se miden n = 1.000 y 10.000 y se muestra el plan de qué casos se estimarán.
+
+```
+javac -d java/out java/src/*.java
+
+java -cp java/out MedirOrdenamientoP2          # Insertion, Dual-Pivot, Heap  -> results/ordenamiento_java_p2.csv
+java -cp java/out MedirOrdenamientoP3          # Merge, Radix, Bucket         -> results/ordenamiento_java_p3.csv
+python python/medir_ordenamiento_p2.py         # -> results/ordenamiento_python_p2.csv
+python python/medir_ordenamiento_p3.py         # -> results/ordenamiento_python_p3.csv
+
+python graficas/graficas_ordenamiento.py       # gráficas del Punto 1
+```
+
+**Detalles de implementación:**
+
+- **Radix Sort:** versión LSD en base 10, con 8 pasadas (una por dígito) y Counting Sort estable en cada una.
+- **Bucket Sort:** la versión de GeeksforGeeks trabaja con decimales en [0, 1); se adaptó a enteros de 8 dígitos. Se usan n cubetas y el índice de cada valor es `(valor − mínimo) · n / (máximo − mínimo + 1)`. Cada cubeta se ordena con Insertion Sort. Como los datos son uniformes, cada cubeta recibe en promedio un elemento.
+- **Merge Sort:** estable (usa `<=` al mezclar) y no es in-place: usa O(n) de memoria extra.
+- **Dual-Pivot QuickSort:** el pivote se toma de los extremos del subarreglo. Con entrada ya ordenada (ascendente o descendente) la partición queda muy desbalanceada y la recursión llega a una profundidad cercana a n/2. Por eso en esos casos se producen `RecursionError` en Python y `StackOverflowError` en Java; se registran en el CSV como `error:...` sin detener el programa.
+
+**Casos que superan 5 minutos o fallan por la pila:** antes de medir cada tamaño se predice el tiempo de una ejecución a partir del tamaño anterior: `tiempo_predicho = último tiempo medido × factor teórico` (el factor es 10 para O(n), 100 para O(n²) y ≈ 10 · log(n₁)/log(n₀) para O(n log n)). Si la predicción supera 5 minutos, el caso no se ejecuta y se registra con `tipo = estimado`. Si un tamaño menor falló por la pila, los mayores también se registran como estimados. En las gráficas, los valores estimados se dibujan con línea punteada, marcador hueco o barra rayada.
+
+Resultados: `results/ordenamiento_java_p2.csv`, `results/ordenamiento_java_p3.csv`, `results/ordenamiento_python_p2.csv` y `results/ordenamiento_python_p3.csv`.
+
+| Archivo de gráfica | Contenido |
+|---|---|
+| `graficas/p1_crecimiento_java.png`, `graficas/p1_crecimiento_python.png` | n contra tiempo para los seis algoritmos, escala log-log, una gráfica por tipo de entrada |
+| `graficas/p1_orden_java_1000.png`, `_10000.png`, `_100000.png` | Efecto del orden de la entrada (aleatoria, ascendente, descendente) |
+| `graficas/p1_java_vs_python_1M.png` | Barras Java contra Python con n = 1.000.000, entrada aleatoria |
 
 ---
 
@@ -171,17 +210,26 @@ python graficas/graficas_busqueda.py   # gráficas y tablas
 
 ## 5. Punto 3.2: ¿Ordenar o no ordenar?
 
-Calcula a partir de cuántas búsquedas k conviene ordenar el arreglo (con el algoritmo de menor tiempo medido) y usar búsqueda binaria, en lugar de hacer k búsquedas lineales:
+Calcula a partir de cuántas búsquedas k conviene ordenar el arreglo (con el algoritmo de ordenamiento más rápido medido, entrada aleatoria) y usar búsqueda binaria, en lugar de hacer k búsquedas lineales:
 
 ```
-k > T_orden / (t_lineal − t_binaria)
+k > k* = T_orden / (t_lineal − t_binaria)
 ```
 
-Requiere los CSV de búsqueda y de ordenamiento:
+Requiere los CSV de búsqueda y de ordenamiento (con n = 1.000.000):
 
 ```
 python graficas/punto_3_2.py
 ```
+
+Resultados con las mediciones definitivas:
+
+| | Java | Python |
+|---|---|---|
+| Mejor ordenamiento (T_orden) | Radix Sort: 31,826 ms | Bucket Sort: 766,435 ms |
+| Búsqueda lineal | 88.983,2 ns | 13.477.961,4 ns |
+| Búsqueda binaria | 125,8 ns | 1.734,1 ns |
+| k* | 358,16 → conviene ordenar desde k = 359 | 56,87 → conviene ordenar desde k = 57 |
 
 ---
 
@@ -213,7 +261,14 @@ Condiciones: equipo conectado a la corriente, sin otras aplicaciones abiertas y 
 - [Interpolation Search](https://www.geeksforgeeks.org/dsa/interpolation-search/)
 - [Exponential Search](https://www.geeksforgeeks.org/dsa/exponential-search/)
 
-**Ordenamiento:** _(completar por las personas 2 y 3)_
+**Ordenamiento (GeeksforGeeks):**
+
+- [Insertion Sort](https://www.geeksforgeeks.org/dsa/insertion-sort-algorithm/)
+- [Dual-Pivot QuickSort](https://www.geeksforgeeks.org/dsa/dual-pivot-quicksort/)
+- [Heap Sort](https://www.geeksforgeeks.org/dsa/heap-sort/)
+- [Merge Sort](https://www.geeksforgeeks.org/dsa/merge-sort/)
+- [Radix Sort](https://www.geeksforgeeks.org/dsa/radix-sort/)
+- [Bucket Sort](https://www.geeksforgeeks.org/dsa/bucket-sort-2/)
 
 ## Uso de inteligencia artificial
 
